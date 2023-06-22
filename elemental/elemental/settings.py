@@ -123,3 +123,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# User_Model을 우리가 정의한 user앱의 User로 사용하겠다고 명시
+AUTH_USER_MODEL = 'user.User'

@@ -4,15 +4,28 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 # ORM실행시 호출되는 매써드를 관리
 class UserManager(BaseUserManager):
     
-    # superuser
-    # password는 AbstractBaseUser에 명시, **kwargs는 여러개의 인자를 딕셔너리로 받아줌
-    def create_superuser(self, username, password **kwargs):
+    #user, superuser의 공통사항
+    def _create_user(self, username, password, **kwargs):
         user = self.model(
-            username = username
+            username = username,
+            # is_superuser가 들어와서 설정됨
+            **kwargs
         )
-        # 암호화 위해 user.password = password 대신 set_password 사용
         user.set_password(password)
         user.save()
+        
+    #user
+    def create_user(self, username, password, **kwargs):
+        # 호출만 해주면 됨
+        self._create_user(username, password, **kwargs)
+
+    # superuser
+    # password는 AbstractBaseUser에 명시, **kwargs는 여러개의 인자를 딕셔너리로 받아줌
+    def create_superuser(self, username, password, **kwargs):
+        # user.is_superuser = True와 동일
+        kwargs.setdefault('is_superuser', True)
+        self._create_user(username, password, **kwargs)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     # 로그인시 뭐로 인증할 지 명시
@@ -30,6 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(
         auto_now=True,
     )
+
+    # ORM이 usermanager통해 실행됨
+    objects = UserManager()
 
     @property
     def is_staff(self):
